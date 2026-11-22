@@ -1,0 +1,70 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: ai-lab-api
+  namespace: ai-lab
+  labels:
+    app: ai-lab-api
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: ai-lab-api
+  template:
+    metadata:
+      labels:
+        app: ai-lab-api
+    spec:
+      containers:
+        - name: ai-lab-api
+          image: ai-lab-api:v1
+          imagePullPolicy: Never
+
+          ports:
+            - name: http
+              containerPort: 8000
+
+          env:
+            - name: OLLAMA_URL
+              value: "http://192.168.5.2:11434"
+
+            - name: OLLAMA_MODEL
+              value: "qwen2.5:1.5b"
+
+          resources:
+            requests:
+              cpu: 100m
+              memory: 128Mi
+            limits:
+              cpu: 500m
+              memory: 512Mi
+
+          readinessProbe:
+            httpGet:
+              path: /health
+              port: 8000
+            initialDelaySeconds: 5
+            periodSeconds: 10
+
+          livenessProbe:
+            httpGet:
+              path: /health
+              port: 8000
+            initialDelaySeconds: 15
+            periodSeconds: 20
+
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: ai-lab-api
+  namespace: ai-lab
+spec:
+  type: ClusterIP
+  selector:
+    app: ai-lab-api
+  ports:
+    - name: http
+      port: 8000
+      targetPort: 8000
+      protocol: TCP

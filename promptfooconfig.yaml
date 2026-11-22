@@ -1,0 +1,41 @@
+
+description: "AI Lab - Qwen LLM Evaluation"
+
+prompts:
+  - "{{question}}"
+
+providers:
+  - id: https
+    config:
+      url: http://localhost:8001/generate
+      method: POST
+      headers:
+        Content-Type: application/json
+      body:
+        prompt: "{{question}}"
+      responseParser: "json.response"
+
+tests:
+  - vars:
+      question: "What is Kubernetes?"
+    assert:
+      - type: contains
+        value: "cluster"
+
+  - vars:
+      question: "What is Docker?"
+    assert:
+      - type: contains
+        value: "container"
+
+  - vars:
+      question: "What is a Kubernetes pod?"
+    assert:
+      - type: contains
+        value: "container"
+
+  - vars:
+      question: "What is Pytest used for?"
+    assert:
+      - type: contains
+        value: "test"
